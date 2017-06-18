@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Train Schedule</title>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+ 
+  <body>
+
+  <div id="container">
+
+  <div class="row">
+    <div class="col-md-12 t1">Anytime is Train Time<h3> Choo Choo Choo. All Aboard. See the World.</h3></div>
+  </div>
+  
+  <p></p>
+  <!--schedule table begins-->
+  <div id="schedule-table" class="row"></div>
+    <!--schedule output begins-->
+    <div id="schedule-table" class="row">
+    <!--schedule header-->
+    <div class="col-md-12 t2">Current Train Schedule</div>
+    <!--print schedule-->
+    <div class="col-md-12 panel space" class="row">
+    <!--schedule output heading begins-->
+      <div class="col-md-3 bold">Train Name</div>
+        <div class="col-md-3 bold" >Destination</div>
+        <div class="col-md-2 bold right">Frequency (min)</div>
+        <div class="col-md-2 bold right">Next Arrival</div>
+        <div class="col-md-2 bold right">Minutes Away</div>
+      </div>
+    <!--schedule output heading ends-->
+    <div class="col-md-12 panel" class="row">
+      <div class="col-md-3" id="name-display"></div>
+      <div class="col-md-3" id="destination-display"></div>
+      <div class="col-md-2 right" id="frequency-display"></div>
+      <div class="col-md-2 right" id="firstTrain-display"></div>
+      <div class="col-md-2 right" id="minutes-display"></div>
+    </div>
+    <!--schedule output ends-->
+    </div>
+<p></p>
+<!-- Form -->
+  <div id="add-train" class="row p">
+  <div class="col-md-12 t2">Add Train</div>
+    <div class="col-md-12">Train Name</div>
+      <div class="col-md-12"><input id="name" type="text" size="100%" class="input"></div> 
+    <div class="col-md-12" >Destination</div>
+      <div class="col-md-12"><input id="destination" type="text" size="100%" class="input"></div>   
+    <div class="col-md-12" >First Train Time (HH:mm - military time)</div>
+      <div class="col-md-12"><input id="firstTrain" type="text" size="100%" class="input"></div>   
+    <div class="col-md-12">Frequency (min)</div>
+      <div class="col-md-12"><input id="frequency" type="text" size="100%" class="input"></div>    
+    <div class="col-md-12"><input id="input" class="btn" value="Submit" type="submit"></div>
+<!--form ends -->
+
+</div><!--container ends-->
+
+<script>
+
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCtHMVUycyFkCL5qpVDguUYWHM4omFsvqM",
+    authDomain: "trainschedule-dd7b4.firebaseapp.com",
+    databaseURL: "https://trainschedule-dd7b4.firebaseio.com",
+    projectId: "trainschedule-dd7b4",
+    storageBucket: "",
+    messagingSenderId: "159858591180"
+  };
+  firebase.initializeApp(config);
+
+//create db container
+var database = firebase.database();
+
+console.log();
+
+//click event
+$("#input").on("click", function(event) {
+      //prevents page from refreshing when a user hits "enter"
+      event.preventDefault();
+      //get input
+      var name = $("#name").val().trim();
+      var destination = $("#destination").val().trim();
+      var firstTrain = $("#firstTrain").val().trim();
+      var frequency = $("#frequency").val().trim();
+
+    //first Time (pushed back 1 year to make sure it comes before current time)
+    var firstTrainConverted = moment(firstTrain, "hh:mm").subtract(1, "years");
+    console.log(firstTrainConverted);
+
+    //current Time
+    var currentTime = moment();
+    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+
+    //difference between times
+    var diffTime = moment().diff(moment(firstTrainConverted), "minutes");
+    console.log("DIFFERENCE IN TIME: " + diffTime);
+
+    //time apart (remainder)
+    var tRemainder = diffTime % frequency;
+    console.log(tRemainder);
+
+    //minute until train
+    var tMinutesTillTrain = frequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+    //next train
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+    var arrivalTime = moment(nextTrain).format("LT");
+    var minutesAway = moment(nextTrain).fromNow(moment(),"minutes"); 
+
+    //add to firebase database
+    database.ref().push({
+    TRAIN:name, TO:destination, FREQUENCY:frequency, NEXT:arrivalTime, MINUTES:minutesAway
+})
+    console.log(name + " " + destination + " " + frequency + " " + moment(nextTrain).format("LT") 
+      + " " + minutesAway);
+
+    window.location.reload();
+})
+
+//list values under each property
+database.ref().on("child_added", function(childSnapshot) {
+    //log snapshot values
+    console.log(childSnapshot.val().TRAIN);
+    console.log(childSnapshot.val().TO);
+    console.log(childSnapshot.val().FREQUENCY);
+    console.log(childSnapshot.val().NEXT);
+    console.log(childSnapshot.val().MINUTES);
+
+    //display in HTML
+    $("#name-display").append("<p>" + childSnapshot.val().TRAIN + "</p>");
+    $("#destination-display").append("<p>" + childSnapshot.val().TO + "</p>");
+    $("#frequency-display").append("<p>" + childSnapshot.val().FREQUENCY + "</p>");
+    $("#firstTrain-display").append("<p>" + childSnapshot.val().NEXT + "</p>");
+    $("#minutes-display").append("<p>" + childSnapshot.val().MINUTES + "</p>");
+
+    //handle errors
+    }, function(errorObject) {
+      console.log("Errors handled: " + errorObject.code);
+});
+
+</script>
+
+</body>
+
+</html>

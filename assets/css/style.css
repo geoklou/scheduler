@@ -1,0 +1,68 @@
+/*css for train scheduler*/
+p{
+  font-size: 16px; 
+  margin-bottom: 2px;
+  border-bottom: 1px #cccccc dotted ;
+}
+
+#container{
+  margin: 0px 50px 50px 50px;
+}
+
+.heading{
+  border-bottom: 20px white solid;
+}
+
+.t1{
+  padding:20px; 
+  /*background-color: black; */
+  color: white; 
+  text-align: center; 
+  font-size: 36px;
+  background-image: url("../images/hogwarts.jpg");
+}
+
+.t2{
+  padding: 10px; 
+  background-color: navy; 
+  color: white;
+  font-size: 140%;
+}
+
+.bold{
+  font-weight:bold;
+  font-size: 120%;
+}
+
+.space{
+  margin:5px 0px 5px 0px;
+}
+
+.row{
+  border: 1px #666 solid;
+}
+
+.right{
+  text-align: right;
+}
+
+.btn{
+  background-color: blue;
+  color: white; 
+  margin-top: 5px; 
+  margin-bottom: 5px;
+}
+
+.btn:focus{
+  color: yellow;
+  background-color: navy;
+}
+
+.btn:hover{
+  color:white !important; 
+  background-color: maroon;
+}
+
+.input{
+  background-color: #ffffcc;
+ }
